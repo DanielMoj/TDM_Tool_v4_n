@@ -1,0 +1,108 @@
+# optimization_config.yaml - Configuration for Stan/MCMC Optimizations
+
+# Memory Management Settings
+memory:
+  max_memory_mb: 4096              # Maximum memory usage before triggering cleanup
+  chunk_size: 1000                  # Number of draws to process per chunk
+  gc_threshold_mb: 3500            # Trigger garbage collection above this threshold
+  cache_max_size_mb: 500           # Maximum size for warmstart cache
+  temp_file_cleanup: true          # Auto-delete temporary Stan files
+
+# Warmstart Configuration
+warmstart:
+  enabled: true                     # Enable warmstart functionality
+  cache_dir: "cache/warmstart"     # Directory for warmstart cache
+  max_age_hours: 24                # Maximum age for valid warmstart data
+  save_metric: true                # Save mass matrix/metric
+  save_step_sizes: true            # Save adapted step sizes
+  compression: true                # Compress cache files
+  auto_cleanup_days: 7             # Auto-delete cache older than N days
+
+# Adaptive Sampling Settings
+adaptive_sampling:
+  enabled: true                     # Enable adaptive sampling
+  max_attempts: 3                   # Maximum adaptation attempts
+  adapt_delta_increment: 0.05      # Increment for adapt_delta on divergences
+  initial_adapt_delta: 0.8         # Starting adapt_delta value
+  max_adapt_delta: 0.99            # Maximum adapt_delta value
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    check_interval: 100            # Check convergence every N iterations
+    rhat_threshold: 1.01           # R-hat threshold for convergence
+    ess_threshold: 400             # ESS threshold for convergence
+    min_iterations: 200            # Minimum iterations before stopping
+
+# Chain Management
+chains:
+  auto_adjust: true                # Automatically adjust chain count
+  min_chains: 2                    # Minimum number of chains
+  max_chains: 8                    # Maximum number of chains
+  target_ess: 1000                # Target effective sample size
+  parallel_chains: auto            # Number of parallel chains (auto = cores - 1)
+
+# Draw Extraction
+extraction:
+  format: "draws_matrix"           # Memory-efficient format
+  thin_default: 1                  # Default thinning interval
+  thin_large_fits: 2              # Thinning for fits > threshold
+  large_fit_threshold_mb: 1000    # Threshold for large fits
+  save_output_files: true         # Save Stan output files for large fits
+  output_dir: "cache/stan_outputs"
+
+# ADVI/Variational Inference
+variational:
+  enabled: true                    # Enable VI methods
+  default_algorithm: "meanfield"  # Default VI algorithm
+  output_samples: 1000            # Number of posterior samples
+  max_iterations: 10000           # Maximum VI iterations
+  tol_rel_obj: 0.01              # Relative tolerance
+  fallback_to_laplace: true      # Use Laplace if VI fails
+  
+  # Convergence monitoring
+  monitor_elbo: true              # Monitor ELBO convergence
+  elbo_window: 100               # Window for ELBO monitoring
+  elbo_threshold: 10             # ELBO variance threshold
+
+# Performance Monitoring
+monitoring:
+  enabled: true                   # Enable performance monitoring
+  log_memory: true               # Log memory usage
+  log_timing: true               # Log execution times
+  log_convergence: true          # Log convergence metrics
+  log_file: "logs/optimization.log"
+  verbose: true                  # Verbose output
+
+# Model-specific Settings
+models:
+  pk_models:
+    adapt_delta: 0.95            # Higher for complex PK models
+    max_treedepth: 12           # Increased tree depth
+    thin: 2                     # Default thinning
+    
+  pd_models:
+    adapt_delta: 0.9
+    max_treedepth: 10
+    thin: 1
+    
+  pkpd_models:
+    adapt_delta: 0.99           # Very high for joint models
+    max_treedepth: 15
+    thin: 3
+
+# Diagnostic Thresholds
+diagnostics:
+  max_rhat: 1.01                # Maximum acceptable R-hat
+  min_ess_bulk: 400             # Minimum bulk ESS
+  min_ess_tail: 400             # Minimum tail ESS
+  max_divergences: 10           # Maximum acceptable divergences
+  max_treedepth_hits: 20        # Maximum treedepth hits
+  energy_threshold: 0.2         # EBFMI threshold
+
+# Export Settings
+export:
+  format: "rds"                  # Default export format
+  compress: true                 # Compress exported files
+  include_diagnostics: true      # Include diagnostic info
+  include_metadata: true         # Include metadata
